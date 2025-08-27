@@ -3,20 +3,21 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.util.Random;
 
 public class IPC1B_2S2025 {
-private static Scanner sc = new Scanner(System.in);
+private static Scanner sc = new Scanner(System.in);//variable scanner
+private static Random rand=new Random();
 //variables
 private static boolean valido = false;// variable para verficar el ingreso adecuado de datos
 private static String[] NombreProducto= new String[100];
-private static int[] CategoriaProducto= new int[100];
+private static String[] CategoriasProducto = {"Camisas", "Pantalones", "Accesorios", "Otros"}; 
 private static double[] PrecioProducto= new double[100];
 private static int[] StockProducto = new int[100];
+private static String[] CodigoProducto = new String[100];
 private static int ContadorProductos=0;
 private static boolean[] ProductosActivos= new boolean[100]; //varificador logico
 
-
-private static int[] ID= new int[100];
 
     public static void main(String[] args) {
         Menu();
@@ -52,11 +53,11 @@ private static int[] ID= new int[100];
         switch (opcion) {
             case 1:
                 System.out.println("ingresando a agregar producto...\n");
-                AgregarProdcuto();
+                AgregarProducuto();
             break;
             case 2:
-                System.out.println(">>> Buscar Producto <<<");
-                // Aquí va la lógica de buscar
+                System.out.println("ingresando a buscar producto...\n");
+                BuscarProducto();
             break;
             case 3:
                 System.out.println(">>> Eliminar Producto <<<");
@@ -89,12 +90,13 @@ private static int[] ID= new int[100];
 
     }
     //inicio op1 agregar producto
-    private static void AgregarProdcuto(){
+    private static void AgregarProducuto(){
         valido=false;
+        int Aleatorio = rand.nextInt(100);
         String Nombre;
-        double Precio;
-        int Categoria;
-        int Stok;
+        double Precio=0;
+        int Categoria=4;
+        int Stok=0;
         String Codigo;
     
         if(ContadorProductos>=100){
@@ -167,7 +169,88 @@ private static int[] ID= new int[100];
             }
         }
         //fin ingreso stock
+        //ingreso de datos a los vectores
+        NombreProducto[ContadorProductos]=Nombre;
+        CategoriasProducto[ContadorProductos]=CategoriasProducto[Categoria+1];
+        PrecioProducto[ContadorProductos]=Precio;
+        StockProducto[ContadorProductos]=Stok;
+        ProductosActivos[ContadorProductos]=true;
+        //seleccionar codigo para categoria
         
+         switch (Categoria) {
+             case 1:
+                   CodigoProducto[ContadorProductos]="CA"+ContadorProductos+"-"+Aleatorio;  
+             break;
+             case 2:
+                 CodigoProducto[ContadorProductos]="PA"+ContadorProductos+"-"+Aleatorio;
+             break;
+             case 3:
+                 CodigoProducto[ContadorProductos]="AC"+ContadorProductos+"-"+Aleatorio;
+             break;
+             case 4:
+                 CodigoProducto[ContadorProductos]="OT"+ContadorProductos+"-"+Aleatorio;
+             break;
+         }
+         System.out.println("Producto ingresado con exito:");
+         System.out.println("Nombre: "+NombreProducto[ContadorProductos]);
+         System.out.println("Categoria: "+CategoriasProducto[ContadorProductos]);
+         System.out.println("Precio: "+ PrecioProducto[ContadorProductos]);
+         System.out.println("Codigo: "+CodigoProducto[ContadorProductos]);
+         ContadorProductos++;
+        return;
         
     }
+    //fin ingreso producto
+    //inicio buscar producto
+    private static void BuscarProducto(){
+        int opcion=0;//variable para escojer la rubrica en que buscar
+        String busqueda;// varibale para buscar por nombre
+        boolean econtrado=false;// variable para verificar si fue econtrado
+        System.out.println("Buscar por: ");
+        System.out.println("1.Nombre");
+        System.out.println("2.Codigo");
+        System.out.println("3.Categoria");
+        
+        while(!valido){
+            try{
+            System.out.print("Elige una opción: ");
+            opcion = sc.nextInt();
+            valido=true;
+            } catch (InputMismatchException e){
+                System.out.println("ERROR: debe ingresar un numero entero");
+                sc.nextLine(); // limpiar buffer
+            }
+        }
+        
+        switch (opcion){
+            case 1:
+                System.out.println("Ingrese el nombre a buscar:");
+                busqueda = sc.nextLine().toLowerCase();
+                
+                for(int i=0;i<=ContadorProductos;i++){
+                    if (busqueda!=NombreProducto[i]) {
+                        econtrado=false;
+                    }else{
+                        System.out.println("---PRODUCTO ECONTRADO:---");
+                        System.out.println("Nombre: "+NombreProducto[i]);
+                        System.out.println("Precio: "+PrecioProducto[i]);
+                        System.out.println("Codigo: "+CodigoProducto[i]);
+                        System.out.println("Categoria: "+CategoriasProducto[i]);
+                        econtrado=true;
+                    }  
+                }
+                if (!econtrado) {
+                    System.out.println("Producto no econtrado");
+                }
+            break;
+            case 2:
+            break;
+            case 3:
+            break;
+            default:
+                System.out.println("ERROR:opcion fuera de rango");
+        }
+                
+    }
+    //fin buscar producto
 }

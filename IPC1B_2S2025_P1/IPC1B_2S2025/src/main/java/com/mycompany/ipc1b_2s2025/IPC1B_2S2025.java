@@ -11,6 +11,7 @@ private static Random rand=new Random();
 //variables
 private static boolean valido = false;// variable para verficar el ingreso adecuado de datos
 private static String[] NombreProducto= new String[100];
+private static String[] CategoriaAsignada = new String[100]; // categoría real de cada producto
 private static String[] CategoriasProducto = {"Camisas", "Pantalones", "Accesorios", "Otros"}; 
 private static double[] PrecioProducto= new double[100];
 private static int[] StockProducto = new int[100];
@@ -22,10 +23,49 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
     public static void main(String[] args) {
         Menu();
     }
-    
+    //-----------------------metodos ---------------------------
+    //metodo para validar lectura de entero
+    private static int leerEntero(String mensaje){
+        while(true){
+        try{
+            System.out.println(mensaje);
+            int valor=sc.nextInt();
+            sc.nextLine();
+            return valor;
+        }catch(InputMismatchException e){
+            System.out.println("ERROR: Ingrese un numero entero");
+            sc.nextLine();
+        }
+        }
+    }
+    //fin metodo
+    //metodo para validar lectura de double
+    private static double leerDouble(String mensaje) {
+        while (true) {
+            try {
+              System.out.print(mensaje);
+              double valor = sc.nextDouble();
+              sc.nextLine();
+              return valor;
+         } catch (InputMismatchException e) {
+            System.out.println("ERROR: ingrese un número decimal válido.");
+            sc.nextLine();
+        }
+     }
+    }
+    private static void mostrarProducto(int i) {
+    System.out.println("--- PRODUCTO ENCONTRADO ---");
+    System.out.println("Nombre: " + NombreProducto[i]);
+    System.out.println("Precio: " + PrecioProducto[i]);
+    System.out.println("Codigo: " + CodigoProducto[i]);
+    System.out.println("Categoria: " + CategoriaAsignada[i]);
+    }
+    //------------------------fin metodos---------------------
     private static void Menu(){
+       // sc.nextLine();
         int opcion=8;
         do {
+            System.out.println(" "+ContadorProductos);    
         System.out.println("\n--- MENU ---");
         System.out.println("1. Agregar Producto");
         System.out.println("2. Buscar Producto");
@@ -35,21 +75,9 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
         System.out.println("6. Ver Datos del Estudiante");
         System.out.println("7. Bitácora");
         System.out.println("8. Salir");
-    
-        //validar que el valor sea entero
-        while(!valido){
-            try{
-            System.out.print("Elige una opción: ");
-            opcion = sc.nextInt();
-            valido=true;
-            } catch (InputMismatchException e){
-                System.out.println("ERROR: debe ingresar un numero entero");
-                sc.nextLine(); // limpiar buffer
-            }
-        }
-        sc.nextLine();
-        //resgresa el valor natural de la validacion
-        //fin validacion
+        System.out.println("9. Cargar 20 productos de testeo");
+        opcion= leerEntero("Ingrese la opcion ");
+  
         switch (opcion) {
             case 1:
                 System.out.println("ingresando a agregar producto...\n");
@@ -69,7 +97,7 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
             break;
             case 5:
                 System.out.println(">>> Generar Reportes <<<");
-                // Aquí va la lógica de generar reportes
+                GenerarReporte();
             break;
             case 6:
                 System.out.println(">>> Ver Datos del Estudiante <<<");
@@ -82,6 +110,9 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
             case 8:
                 System.out.println("Saliendo del sistema...");
                 break;
+            case 9://opcion para ingresar 20 productos testeados
+                //cargarProductosTest();
+                break;
             default:
             System.out.println("Opción no válida.");
         }
@@ -91,14 +122,13 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
     }
     //inicio op1 agregar producto
     private static void AgregarProducuto(){
-        valido=false;
+        System.out.println("\\033[H\\033[2J");
+        //valido=false;
         int Aleatorio = rand.nextInt(100);
         String Nombre;
         double Precio=0;
         int Categoria=4;
         int Stok=0;
-        String Codigo;
-    
         if(ContadorProductos>=100){
             System.out.println("ERROR: Limite de productos alcanzado");
             return;
@@ -110,68 +140,36 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
         //fin ingreso nombre
         
         //ingreso de categoria
-        
-        while(!valido){
+        do {
             System.out.println("1.Camisas");
             System.out.println("2.Pantalones");
             System.out.println("3.Accesorios");
             System.out.println("4.Otros");
-            
-            try{
-            System.out.println("Ingrese la categoria del producto");
-            Categoria= sc.nextInt();
-            if(Categoria<0 || Categoria>=5){
+            Categoria= leerEntero("Ingrese la categoria del producto");
+           if(Categoria<=0 || Categoria>=5){
                 System.out.println("ERROR: opcion fuera de rango");
-            }else{
-            valido=true;
             }
             
-            } catch (InputMismatchException e){
-                System.out.println("ERROR: debe ingresar valor entero");
-                sc.nextLine(); // limpiar buffer
-            }
-        }
-        valido=false;//resgresa el valor natural de la validacion
-        //fin ingreso categoria
-        
+        } while (Categoria<1 || Categoria>4);
         //ingreso de precio
-        
-        while(!valido){
-            try{
-            System.out.println("Ingrese el precio del producto");
-            Precio= sc.nextDouble();
-            if(Precio<0){
-                System.out.println("ERROR: El precio no puede ser menor que 0");
-            }else{
-            valido=true;
+        do {
+            Precio=leerDouble("Ingrese el precio del producto: ");
+            if(Precio<=0){
+                System.out.println("ERROR: El precio no puede ser menor o igual a 0");
             }
-            } catch (InputMismatchException e){
-                System.out.println("ERROR: debe ingresar numerico");
-                sc.nextLine(); // limpiar buffer
-            }
-        }
-        valido=false;//resgresa el valor natural de la validacion
+        } while (Precio<=0);
         //fin ingreso precio
         //ingreso de stock
-        
-        while(!valido){
-            try{
-            System.out.println("Ingrese la cantidad en stock");
-            Stok= sc.nextInt();
+        do {
+            Stok= leerEntero("Ingrese la cantidad en stock del producto");
             if(Stok<=0){
-                System.out.println("ERROR: El precio no puede ser menor o igual a 0");
-            }else{
-            valido=true;
+                System.out.println("ERROR: El stock no puede ser menor o igual a 0");
             }
-            } catch (InputMismatchException e){
-                System.out.println("ERROR: debe ingresar numerico");
-                sc.nextLine(); // limpiar buffer
-            }
-        }
+        } while (Stok<=0);
         //fin ingreso stock
         //ingreso de datos a los vectores
         NombreProducto[ContadorProductos]=Nombre;
-        CategoriasProducto[ContadorProductos]=CategoriasProducto[Categoria+1];
+        CategoriaAsignada[ContadorProductos] = CategoriasProducto[Categoria - 1];
         PrecioProducto[ContadorProductos]=Precio;
         StockProducto[ContadorProductos]=Stok;
         ProductosActivos[ContadorProductos]=true;
@@ -193,49 +191,35 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
          }
          System.out.println("Producto ingresado con exito:");
          System.out.println("Nombre: "+NombreProducto[ContadorProductos]);
-         System.out.println("Categoria: "+CategoriasProducto[ContadorProductos]);
+         System.out.println("Categoria: "+CategoriaAsignada[ContadorProductos]);
          System.out.println("Precio: "+ PrecioProducto[ContadorProductos]);
          System.out.println("Codigo: "+CodigoProducto[ContadorProductos]);
          ContadorProductos++;
-        return;
-        
+     
     }
     //fin ingreso producto
+    
     //inicio buscar producto
     private static void BuscarProducto(){
+        valido=false;
         int opcion=0;//variable para escojer la rubrica en que buscar
         String busqueda;// varibale para buscar por nombre
+        int BusquedaCategoria;
         boolean econtrado=false;// variable para verificar si fue econtrado
         System.out.println("Buscar por: ");
         System.out.println("1.Nombre");
         System.out.println("2.Codigo");
         System.out.println("3.Categoria");
-        
-        while(!valido){
-            try{
-            System.out.print("Elige una opción: ");
-            opcion = sc.nextInt();
-            valido=true;
-            } catch (InputMismatchException e){
-                System.out.println("ERROR: debe ingresar un numero entero");
-                sc.nextLine(); // limpiar buffer
-            }
-        }
+        opcion=leerEntero("Ingrese una opcion: ");
         
         switch (opcion){
-            case 1:
+            case 1://buscar por nombre
                 System.out.println("Ingrese el nombre a buscar:");
-                busqueda = sc.nextLine().toLowerCase();
+                busqueda = sc.nextLine();
                 
-                for(int i=0;i<=ContadorProductos;i++){
-                    if (busqueda!=NombreProducto[i]) {
-                        econtrado=false;
-                    }else{
-                        System.out.println("---PRODUCTO ECONTRADO:---");
-                        System.out.println("Nombre: "+NombreProducto[i]);
-                        System.out.println("Precio: "+PrecioProducto[i]);
-                        System.out.println("Codigo: "+CodigoProducto[i]);
-                        System.out.println("Categoria: "+CategoriasProducto[i]);
+                for(int i=0;i<ContadorProductos;i++){
+                    if (busqueda.equalsIgnoreCase(NombreProducto[i])) {
+                        mostrarProducto(i);
                         econtrado=true;
                     }  
                 }
@@ -243,9 +227,45 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
                     System.out.println("Producto no econtrado");
                 }
             break;
-            case 2:
+            case 2://buscar por codigo
+                System.out.println("Ingrese el codigo del producto a buscar:");
+                busqueda = sc.nextLine();
+                for(int i=0;i<ContadorProductos;i++){
+                    if (busqueda.equalsIgnoreCase(CodigoProducto[i])) {
+                    mostrarProducto(i);
+                    econtrado = true;
+                         break;
+                    
+                    }  
+                }
+                if (!econtrado) {
+                    System.out.println("Producto no econtrado");
+                }
             break;
-            case 3:
+            case 3://buscar por categoria
+                System.out.println("1.Camisas");
+                System.out.println("2.Pantalones");
+                System.out.println("3.Accesorios");
+                System.out.println("4.Otros");
+                do {
+                  BusquedaCategoria = leerEntero("Ingrese el numero de la categoria a buscar:");
+                    if (BusquedaCategoria<=0 || BusquedaCategoria>=5) {
+                        System.out.println("ERROR: opcion fuera de rango");
+                    }
+                  
+                } while (BusquedaCategoria<=0 || BusquedaCategoria>=4);
+                
+                for(int i=0;i<=ContadorProductos;i++){
+                    if (CategoriaAsignada[BusquedaCategoria-1]!=CategoriaAsignada[i]) {
+                        econtrado=false;
+                    }else{
+                        mostrarProducto(i);
+                        econtrado=true;
+                    }  
+                }
+                if (!econtrado) {
+                    System.out.println("Producto no econtrado");
+                }
             break;
             default:
                 System.out.println("ERROR:opcion fuera de rango");
@@ -253,4 +273,27 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
                 
     }
     //fin buscar producto
+    //op 3 eliminar producto
+    private static void eliminarProducto(){
+        
+    }
+    //fij op 3
+    //op 5 generar reporte
+    private static void GenerarReporte(){
+        for (int i = 0; i < ContadorProductos; i++) {
+            System.out.println("Nombre: "+NombreProducto[i]);
+            System.out.println("Precio: "+PrecioProducto[i]);
+            System.out.println("Codigo: "+CodigoProducto[i]);
+            System.out.println("Categoria: "+CategoriaAsignada[i]);
+        }
+    }
+    // MÉTODO PARA CARGAR 20 PRODUCTOS DE PRUEBA
+    
+    
+    }
+
+
+
+
+
 }

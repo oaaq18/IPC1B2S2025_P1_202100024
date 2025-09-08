@@ -18,9 +18,16 @@ private static int[] StockProducto = new int[100];
 private static String[] CodigoProducto = new String[100];
 private static int ContadorProductos=0;
 private static boolean[] ProductosActivos= new boolean[100]; //varificador logico
+//variables de venta
+private static int[] NoFactura=new int[100];//almacena el No. de la factura
+private static String[][] CodigosFactura= new String[100][100];//almacena el id de la factura y los codigos de la factura en esa posicion
+private static String[][] DescripcionFactura= new String[100][100];//almacena el id de la factura y la descripcion de los productos de la factura en esa posicion
+private static int[][] CantidadFactura= new int[100][100]; ////almacena el cantidad de los productos de la factura
+private static double[] TotalFactura = new double[100];// almacena el total de la factura
+private static String[] FechaYHoraFactura = new String[100]; //almacena la fecha y hora de la factura
+private static int ContadorFactura=0; //correlativo de facturas
 
-
-    public static void main(String[] args) {
+     public static void main(String[] args) {
         Menu();
     }
     //-----------------------metodos ---------------------------
@@ -53,12 +60,22 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
         }
      }
     }
+    
     private static void mostrarProducto(int i) {
-    System.out.println("--- PRODUCTO ENCONTRADO ---");
-    System.out.println("Nombre: " + NombreProducto[i]);
-    System.out.println("Precio: " + PrecioProducto[i]);
-    System.out.println("Codigo: " + CodigoProducto[i]);
-    System.out.println("Categoria: " + CategoriaAsignada[i]);
+        System.out.println("------");
+        System.out.println("Nombre: " + NombreProducto[i]);
+        System.out.println("Precio: " + PrecioProducto[i]);
+        System.out.println("Cantidad en stock: "+ StockProducto[i]);
+        System.out.println("Codigo: " + CodigoProducto[i]);
+        System.out.println("Categoria: " + CategoriaAsignada[i]);
+    }
+    private static int buscarProductoPorcodigo(String codigo){
+        for (int i = 0; i < ContadorProductos; i++) {
+            if (codigo.equalsIgnoreCase(CodigoProducto[i]) && ProductosActivos[i] ) {
+              return i;  
+            }
+        }
+        return -1;// no se econtro
     }
     //------------------------fin metodos---------------------
     private static void Menu(){
@@ -88,30 +105,33 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
                 BuscarProducto();
             break;
             case 3:
-                System.out.println(">>> Eliminar Producto <<<");
-                // Aquí va la lógica de eliminar
+                System.out.println("ingresando a eliminar producto...\n");
+                eliminarProducto();
             break;
             case 4:
-                System.out.println(">>> Registrar Venta <<<");
-                // Aquí va la lógica de registrar una venta
+                System.out.println("ingresando a registrar venta...\n");
+                 registrarVenta();
+              
             break;
             case 5:
-                System.out.println(">>> Generar Reportes <<<");
+                System.out.println("ingresando a generar reporte...\n");
                 GenerarReporte();
             break;
             case 6:
-                System.out.println(">>> Ver Datos del Estudiante <<<");
-                // Aquí puedes mostrar tus datos: nombre, carné, curso, etc.
+                System.out.println("--DATOS DE ESTUDIANTE--");
+                System.out.println("Nombre: Osmar Alejandro Alay Quevedo");
+                System.out.println("Carnet: 202100024");
+                
             break;
             case 7:
-                System.out.println(">>> Bitácora <<<");
-                // Aquí puedes imprimir un historial de acciones
+                System.out.println("ingresando a bitacora...\n");
+                
             break;
             case 8:
                 System.out.println("Saliendo del sistema...");
                 break;
             case 9://opcion para ingresar 20 productos testeados
-                //cargarProductosTest();
+                cargarProductosTest();
                 break;
             default:
             System.out.println("Opción no válida.");
@@ -122,7 +142,7 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
     }
     //inicio op1 agregar producto
     private static void AgregarProducuto(){
-        System.out.println("\\033[H\\033[2J");
+        
         //valido=false;
         int Aleatorio = rand.nextInt(100);
         String Nombre;
@@ -199,13 +219,17 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
     }
     //fin ingreso producto
     
-    //inicio buscar producto
+    //op 2 inicio buscar producto
     private static void BuscarProducto(){
         valido=false;
         int opcion=0;//variable para escojer la rubrica en que buscar
         String busqueda;// varibale para buscar por nombre
         int BusquedaCategoria;
         boolean econtrado=false;// variable para verificar si fue econtrado
+        if (ContadorProductos<=0) {//verificador de productos
+            System.out.println("ERROR: no hay productos ingresados");
+            return;
+        }
         System.out.println("Buscar por: ");
         System.out.println("1.Nombre");
         System.out.println("2.Codigo");
@@ -218,7 +242,7 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
                 busqueda = sc.nextLine();
                 
                 for(int i=0;i<ContadorProductos;i++){
-                    if (busqueda.equalsIgnoreCase(NombreProducto[i])) {
+                    if (busqueda.equalsIgnoreCase(NombreProducto[i]) && ProductosActivos[i]==true) {
                         mostrarProducto(i);
                         econtrado=true;
                     }  
@@ -228,19 +252,16 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
                 }
             break;
             case 2://buscar por codigo
+                int BusquedaCodigo;
                 System.out.println("Ingrese el codigo del producto a buscar:");
                 busqueda = sc.nextLine();
-                for(int i=0;i<ContadorProductos;i++){
-                    if (busqueda.equalsIgnoreCase(CodigoProducto[i])) {
-                    mostrarProducto(i);
-                    econtrado = true;
-                         break;
-                    
-                    }  
+                BusquedaCodigo=buscarProductoPorcodigo(busqueda);
+                if (BusquedaCodigo!=-1) {
+                    mostrarProducto(BusquedaCodigo);
+                }else{
+                System.out.println("Producto no econtrado");
                 }
-                if (!econtrado) {
-                    System.out.println("Producto no econtrado");
-                }
+               
             break;
             case 3://buscar por categoria
                 System.out.println("1.Camisas");
@@ -256,7 +277,7 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
                 } while (BusquedaCategoria<=0 || BusquedaCategoria>=4);
                 
                 for(int i=0;i<=ContadorProductos;i++){
-                    if (CategoriaAsignada[BusquedaCategoria-1]!=CategoriaAsignada[i]) {
+                    if (CategoriaAsignada[BusquedaCategoria-1]!=CategoriaAsignada[i] && ProductosActivos[i]==true) {
                         econtrado=false;
                     }else{
                         mostrarProducto(i);
@@ -275,20 +296,178 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
     //fin buscar producto
     //op 3 eliminar producto
     private static void eliminarProducto(){
+        String busqueda;
+        int opcion;
+        boolean encontrado=false;
+        if (ContadorProductos<=0) {//verificador de productos
+            System.out.println("ERROR: no hay productos ingresados");
+            return;
+        }
+        
+        int BusquedaCodigo;
+                System.out.println("Ingrese el codigo del producto a buscar:");
+                busqueda = sc.nextLine();
+                BusquedaCodigo=buscarProductoPorcodigo(busqueda);
+                if (BusquedaCodigo!=-1) {
+                    mostrarProducto(BusquedaCodigo);
+                    
+                    do{
+                    opcion = leerEntero("desea eliminar? 1: si 0: no: ");
+                    if (opcion==1) {
+                        ProductosActivos[BusquedaCodigo]=false;
+                        ContadorProductos--;
+                        System.out.println("PRODUCTO ELIMINADO CON EXITO");
+                        break;
+                    }else if(opcion==0){
+                        System.out.println("ELIMINACION ABORTADA");
+                        break;
+                    }else{
+                        System.out.println("ERROR: opcion fuera de rango");
+                    }
+                }while(opcion !=0 || opcion !=1);
+                }else{
+                System.out.println("Producto no econtrado");
+                }
+                
         
     }
     //fij op 3
+    //op 4 generar venta
+    private static void registrarVenta(){
+        int continuar;
+        int CantidadVenta;
+        int ContadorEnFactura=0; //lleva el conteo de los productos ingresados en la factura
+        boolean encontrado=false;
+        boolean CantidadValida=false; //verifica que la cantidad ingresada sea correcta
+        String busqueda;
+        if (ContadorProductos<=0) {//verificador de productos
+            System.out.println("ERROR: no hay productos ingresados");
+            return;
+        }
+        do {
+        do {
+            //ingresando producto
+            do {
+                int BusquedaCodigo;
+                System.out.println("Ingrese el codigo del producto a buscar:");
+                busqueda = sc.nextLine();
+                BusquedaCodigo=buscarProductoPorcodigo(busqueda);
+                if(StockProducto[BusquedaCodigo]<=0){
+                    System.out.println("ERROR: no hay mas prducto en stock");
+                    encontrado=false;
+                }else if (BusquedaCodigo!=-1) {
+                    System.out.println("PRODUCTO:");
+                    System.out.println("Nombre: "+NombreProducto[BusquedaCodigo]);
+                    System.out.println("Precio: "+PrecioProducto[BusquedaCodigo]);
+                    
+                    do {
+                        System.out.println("Ingrese la cantidad a vender");
+                        CantidadVenta=leerEntero(busqueda);
+                        if (CantidadVenta>StockProducto[BusquedaCodigo]) {
+                            System.out.println("ERROR: la cantidad ingresada es mayor a la cantidad en stock");
+                            CantidadValida=false;
+                        }else{
+                        CantidadValida=true;
+                        }
+                    } while (!CantidadValida);
+                    //ingrsando el producto a los vectores
+                    
+                    CodigosFactura[ContadorFactura][ContadorEnFactura]=busqueda;
+                    DescripcionFactura[ContadorFactura][ContadorEnFactura]=NombreProducto[BusquedaCodigo];
+                    CantidadFactura[ContadorFactura][ContadorEnFactura]=CantidadVenta;
+                    TotalFactura[ContadorFactura]=TotalFactura[ContadorFactura]+PrecioProducto[BusquedaCodigo]*CantidadVenta;
+                    StockProducto[BusquedaCodigo]=StockProducto[BusquedaCodigo]-CantidadVenta;
+                    //finingreso
+                    encontrado=true;
+                }else{
+                System.out.println("Producto no econtrado");
+                    encontrado=false;
+                }
+                
+            } while (!encontrado);
+
+            
+                continuar= leerEntero("Desea ingresar otro producto? 1: si 0: No");
+                if (continuar!=1 || continuar!=0) {
+                    System.out.println("Opcion fuera de rango");
+                }
+            } while (continuar!=1 || continuar!=0);
+        } while (continuar!=1);
+       
+        ContadorFactura++;
+    }
+    //fin op 4
     //op 5 generar reporte
     private static void GenerarReporte(){
-        for (int i = 0; i < ContadorProductos; i++) {
-            System.out.println("Nombre: "+NombreProducto[i]);
-            System.out.println("Precio: "+PrecioProducto[i]);
-            System.out.println("Codigo: "+CodigoProducto[i]);
-            System.out.println("Categoria: "+CategoriaAsignada[i]);
+        int opcion;
+        if (ContadorProductos<=0) {//verificador de productos
+            System.out.println("ERROR: no hay productos ingresados");
+            return;
         }
+        System.out.println("--REPORTES--");
+        System.out.println("1. Productos");
+        System.out.println("2. Ventas");
+        opcion = leerEntero("Ingrese una opcion: ");
+        switch(opcion){
+            case 1:
+                for (int i = 0; i < ContadorProductos; i++) {
+                 if (ProductosActivos[i]==false) {
+               
+                  }else{
+                    System.out.println("----------------------------");
+                    mostrarProducto(i);
+                    System.out.println("----------------------------");
+                 }
+            }
+            break;
+            case 2:
+                
+            break;
+        }
+        
     }
     // MÉTODO PARA CARGAR 20 PRODUCTOS DE PRUEBA
-    
+    private static void cargarProductosTest() {
+        if (ContadorProductos + 20 > 100) {
+            System.out.println("ERROR: No hay espacio suficiente para cargar los productos de prueba.");
+            return;
+        }
+
+        for (int i = 0; i < 20; i++) {
+            int Aleatorio = rand.nextInt(100); // número aleatorio
+            int Categoria = (i % 3)+1;       // alterna entre 1 y 4
+            String Nombre = "ProductoTest" + (ContadorProductos + 1);
+            double Precio = 10 + rand.nextInt(90) + rand.nextDouble(); // precio entre 10 y 100
+            int Stock = rand.nextInt(50) + 1; // stock entre 1 y 50
+
+            // Guardar en los vectores
+            NombreProducto[ContadorProductos] = Nombre;
+            CategoriaAsignada[ContadorProductos] = CategoriasProducto[Categoria - 1];
+            PrecioProducto[ContadorProductos] = Precio;
+            StockProducto[ContadorProductos] = Stock;
+            ProductosActivos[ContadorProductos] = true;
+
+            // Generar código según categoría
+            switch (Categoria) {
+                case 1:
+                    CodigoProducto[ContadorProductos] = "CA" + ContadorProductos + "-" + Aleatorio;
+                    break;
+                case 2:
+                    CodigoProducto[ContadorProductos] = "PA" + ContadorProductos + "-" + Aleatorio;
+                    break;
+                case 3:
+                    CodigoProducto[ContadorProductos] = "AC" + ContadorProductos + "-" + Aleatorio;
+                    break;
+                case 4:
+                    CodigoProducto[ContadorProductos] = "OT" + ContadorProductos + "-" + Aleatorio;
+                    break;
+            }
+
+            ContadorProductos++;
+        }
+
+        System.out.println("Se cargaron 20 productos de prueba exitosamente.");
+        }
     
     }
 
@@ -296,4 +475,4 @@ private static boolean[] ProductosActivos= new boolean[100]; //varificador logic
 
 
 
-}
+

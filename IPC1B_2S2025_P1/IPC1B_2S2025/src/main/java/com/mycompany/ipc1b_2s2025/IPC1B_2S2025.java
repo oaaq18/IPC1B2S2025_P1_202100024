@@ -335,7 +335,8 @@ private static int ContadorFactura=0; //correlativo de facturas
     //op 4 generar venta
     private static void registrarVenta(){
         int continuar;
-        int CantidadVenta;
+        int Diferecia; // muestra la diferecia en stock para que sea posible vender
+        int CantidadVenta=0;
         int ContadorEnFactura=0; //lleva el conteo de los productos ingresados en la factura
         boolean encontrado=false;
         boolean CantidadValida=false; //verifica que la cantidad ingresada sea correcta
@@ -345,18 +346,22 @@ private static int ContadorFactura=0; //correlativo de facturas
             return;
         }
         do {
-        do {
+        
             //ingresando producto
             do {
                 int BusquedaCodigo;
                 System.out.println("Ingrese el codigo del producto a buscar:");
                 busqueda = sc.nextLine();
                 BusquedaCodigo=buscarProductoPorcodigo(busqueda);
-                if(StockProducto[BusquedaCodigo]<=0){
-                    System.out.println("ERROR: no hay mas prducto en stock");
+                
+                if(BusquedaCodigo == -1) {
+                    System.out.println("ERROR: Producto no econtrado");
                     encontrado=false;
-                }else if (BusquedaCodigo!=-1) {
-                    System.out.println("PRODUCTO:");
+                }else if(StockProducto[BusquedaCodigo]<=0){
+                    System.out.println("ERROR: no hay suficiente producto en stock");
+                    encontrado=false;
+                }else{
+                    System.out.println("PRODUCTO ECONTRADO:");
                     System.out.println("Nombre: "+NombreProducto[BusquedaCodigo]);
                     System.out.println("Precio: "+PrecioProducto[BusquedaCodigo]);
                     
@@ -365,6 +370,8 @@ private static int ContadorFactura=0; //correlativo de facturas
                         CantidadVenta=leerEntero(busqueda);
                         if (CantidadVenta>StockProducto[BusquedaCodigo]) {
                             System.out.println("ERROR: la cantidad ingresada es mayor a la cantidad en stock");
+                            Diferecia=StockProducto[BusquedaCodigo]-CantidadVenta;
+                            System.out.println("Ingrese una cantidad menor o igual a: "+Diferecia);
                             CantidadValida=false;
                         }else{
                         CantidadValida=true;
@@ -379,22 +386,19 @@ private static int ContadorFactura=0; //correlativo de facturas
                     StockProducto[BusquedaCodigo]=StockProducto[BusquedaCodigo]-CantidadVenta;
                     //finingreso
                     encontrado=true;
-                }else{
-                System.out.println("Producto no econtrado");
-                    encontrado=false;
                 }
-                
             } while (!encontrado);
 
-            
+            do {
                 continuar= leerEntero("Desea ingresar otro producto? 1: si 0: No");
-                if (continuar!=1 || continuar!=0) {
+                if (continuar!=1 && continuar!=0) {
                     System.out.println("Opcion fuera de rango");
                 }
-            } while (continuar!=1 || continuar!=0);
-        } while (continuar!=1);
-       
+            } while (continuar!=1 && continuar!=0);
+            
+        } while (continuar!=0);
         ContadorFactura++;
+        System.out.println("--Factura registrada--");
     }
     //fin op 4
     //op 5 generar reporte
@@ -421,7 +425,12 @@ private static int ContadorFactura=0; //correlativo de facturas
             }
             break;
             case 2:
-                
+                for (int i = 0; i < ContadorFactura; i++) {
+                    System.out.println("FACTURA No:"+NoFactura[i]);
+                    System.out.println("Fecha: "+FechaYHoraFactura[i]);
+                    System.out.println("Total: "+TotalFactura[i]);
+                    
+                }
             break;
         }
         

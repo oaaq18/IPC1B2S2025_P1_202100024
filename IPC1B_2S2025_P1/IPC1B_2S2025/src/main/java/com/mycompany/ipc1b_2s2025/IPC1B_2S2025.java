@@ -4,11 +4,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.Random;
+import com.itextpdf.text.*;
 
 public class IPC1B_2S2025 {
 private static Scanner sc = new Scanner(System.in);//variable scanner
 private static Random rand=new Random();
-//variables
+//variables de producto
 private static boolean valido = false;// variable para verficar el ingreso adecuado de datos
 private static String[] NombreProducto= new String[100];
 private static String[] CategoriaAsignada = new String[100]; // categoría real de cada producto
@@ -25,7 +26,11 @@ private static String[][] DescripcionFactura= new String[100][100];//almacena el
 private static int[][] CantidadFactura= new int[100][100]; ////almacena el cantidad de los productos de la factura
 private static double[] TotalFactura = new double[100];// almacena el total de la factura
 private static String[] FechaYHoraFactura = new String[100]; //almacena la fecha y hora de la factura
+private static int[][]  ProductosEnFactura= new int[100][100];//almacena la cantidad de productos en una factura para mostrarlos en los ciclos for
 private static int ContadorFactura=0; //correlativo de facturas
+//variable de bitacora
+private static String[] Bitacora=new String[1000];
+private static int ContadorBitacora=0;
 
      public static void main(String[] args) {
         Menu();
@@ -125,7 +130,7 @@ private static int ContadorFactura=0; //correlativo de facturas
             break;
             case 7:
                 System.out.println("ingresando a bitacora...\n");
-                
+                bitacora();
             break;
             case 8:
                 System.out.println("Saliendo del sistema...");
@@ -142,7 +147,8 @@ private static int ContadorFactura=0; //correlativo de facturas
     }
     //inicio op1 agregar producto
     private static void AgregarProducuto(){
-        
+        LocalDateTime ahora = LocalDateTime.now();
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         //valido=false;
         int Aleatorio = rand.nextInt(100);
         String Nombre;
@@ -151,6 +157,8 @@ private static int ContadorFactura=0; //correlativo de facturas
         int Stok=0;
         if(ContadorProductos>=100){
             System.out.println("ERROR: Limite de productos alcanzado");
+            Bitacora[ContadorBitacora]="|"+ahora.format(formato)+" |ACCION: "+"limite de productos alcanzado"+" |ACCION INCORRECTA"+" |ADMIN";
+            ContadorBitacora++;
             return;
         }
         
@@ -215,12 +223,15 @@ private static int ContadorFactura=0; //correlativo de facturas
          System.out.println("Precio: "+ PrecioProducto[ContadorProductos]);
          System.out.println("Codigo: "+CodigoProducto[ContadorProductos]);
          ContadorProductos++;
-     
+         Bitacora[ContadorBitacora]="|"+ahora.format(formato)+" |ACCION: "+"Producto ingresado"+" |ACCION CORRECTA"+" |ADMIN";
+            ContadorBitacora++;
     }
     //fin ingreso producto
     
     //op 2 inicio buscar producto
     private static void BuscarProducto(){
+        LocalDateTime ahora = LocalDateTime.now();
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         valido=false;
         int opcion=0;//variable para escojer la rubrica en que buscar
         String busqueda;// varibale para buscar por nombre
@@ -228,6 +239,8 @@ private static int ContadorFactura=0; //correlativo de facturas
         boolean econtrado=false;// variable para verificar si fue econtrado
         if (ContadorProductos<=0) {//verificador de productos
             System.out.println("ERROR: no hay productos ingresados");
+            Bitacora[ContadorBitacora]="|"+ahora.format(formato)+" |ACCION: "+"se intento ingresar a busqueda sin existencias"+" |ACCION INCORRECTA"+" |ADMIN";
+            ContadorBitacora++;
             return;
         }
         System.out.println("Buscar por: ");
@@ -240,7 +253,6 @@ private static int ContadorFactura=0; //correlativo de facturas
             case 1://buscar por nombre
                 System.out.println("Ingrese el nombre a buscar:");
                 busqueda = sc.nextLine();
-                
                 for(int i=0;i<ContadorProductos;i++){
                     if (busqueda.equalsIgnoreCase(NombreProducto[i]) && ProductosActivos[i]==true) {
                         mostrarProducto(i);
@@ -250,6 +262,8 @@ private static int ContadorFactura=0; //correlativo de facturas
                 if (!econtrado) {
                     System.out.println("Producto no econtrado");
                 }
+                Bitacora[ContadorBitacora]="|"+ahora.format(formato)+" |ACCION: "+"se ingreso busco productos por nombre"+" |ACCION CORRECTA"+" |ADMIN";
+                ContadorBitacora++;
             break;
             case 2://buscar por codigo
                 int BusquedaCodigo;
@@ -258,10 +272,12 @@ private static int ContadorFactura=0; //correlativo de facturas
                 BusquedaCodigo=buscarProductoPorcodigo(busqueda);
                 if (BusquedaCodigo!=-1) {
                     mostrarProducto(BusquedaCodigo);
+                    
                 }else{
                 System.out.println("Producto no econtrado");
                 }
-               
+               Bitacora[ContadorBitacora]="|"+ahora.format(formato)+" |ACCION: "+"se busco un producto por nombre"+" |ACCION CORRECTA"+" |ADMIN";
+               ContadorBitacora++;
             break;
             case 3://buscar por categoria
                 System.out.println("1.Camisas");
@@ -287,6 +303,8 @@ private static int ContadorFactura=0; //correlativo de facturas
                 if (!econtrado) {
                     System.out.println("Producto no econtrado");
                 }
+                Bitacora[ContadorBitacora]="|"+ahora.format(formato)+" |ACCION: "+"se busco un producto codigo"+" |ACCION CORRECTA"+" |ADMIN";
+               ContadorBitacora++;
             break;
             default:
                 System.out.println("ERROR:opcion fuera de rango");
@@ -296,11 +314,16 @@ private static int ContadorFactura=0; //correlativo de facturas
     //fin buscar producto
     //op 3 eliminar producto
     private static void eliminarProducto(){
+        LocalDateTime ahora = LocalDateTime.now();
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        
         String busqueda;
         int opcion;
         boolean encontrado=false;
         if (ContadorProductos<=0) {//verificador de productos
             System.out.println("ERROR: no hay productos ingresados");
+            Bitacora[ContadorBitacora]="|"+ahora.format(formato)+" |ACCION: "+"se intento eliminar productos sin existencia"+" |ACCION INCORRECTA"+" |ADMIN";
+            ContadorBitacora++;
             return;
         }
         
@@ -317,9 +340,13 @@ private static int ContadorFactura=0; //correlativo de facturas
                         ProductosActivos[BusquedaCodigo]=false;
                         ContadorProductos--;
                         System.out.println("PRODUCTO ELIMINADO CON EXITO");
+                        Bitacora[ContadorBitacora]="|"+ahora.format(formato)+" |ACCION: "+"se elimino un producto"+" |ACCION CORRECTA"+" |ADMIN";
+                        ContadorBitacora++;
                         break;
                     }else if(opcion==0){
                         System.out.println("ELIMINACION ABORTADA");
+                        Bitacora[ContadorBitacora]="|"+ahora.format(formato)+" |ACCION: "+"se cancelo una eliminacion"+" |ACCION CORRECTA"+" |ADMIN";
+                        ContadorBitacora++;
                         break;
                     }else{
                         System.out.println("ERROR: opcion fuera de rango");
@@ -334,6 +361,9 @@ private static int ContadorFactura=0; //correlativo de facturas
     //fij op 3
     //op 4 generar venta
     private static void registrarVenta(){
+        LocalDateTime ahora = LocalDateTime.now();
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        
         int continuar;
         int Diferecia; // muestra la diferecia en stock para que sea posible vender
         int CantidadVenta=0;
@@ -343,6 +373,8 @@ private static int ContadorFactura=0; //correlativo de facturas
         String busqueda;
         if (ContadorProductos<=0) {//verificador de productos
             System.out.println("ERROR: no hay productos ingresados");
+            Bitacora[ContadorBitacora]="|"+ahora.format(formato)+" |ACCION: "+"se inento realizar venta sin productos"+" |ACCION INCORRECTA"+" |ADMIN";
+            ContadorBitacora++;
             return;
         }
         do {
@@ -359,6 +391,8 @@ private static int ContadorFactura=0; //correlativo de facturas
                     encontrado=false;
                 }else if(StockProducto[BusquedaCodigo]<=0){
                     System.out.println("ERROR: no hay suficiente producto en stock");
+                    Bitacora[ContadorBitacora]="|"+ahora.format(formato)+" |ACCION: "+"se intento realizar una venta sin stock disponinble"+" |ACCION CORRECTA"+" |ADMIN";
+                    ContadorBitacora++;
                     encontrado=false;
                 }else{
                     System.out.println("PRODUCTO ECONTRADO:");
@@ -384,6 +418,9 @@ private static int ContadorFactura=0; //correlativo de facturas
                     CantidadFactura[ContadorFactura][ContadorEnFactura]=CantidadVenta;
                     TotalFactura[ContadorFactura]=TotalFactura[ContadorFactura]+PrecioProducto[BusquedaCodigo]*CantidadVenta;
                     StockProducto[BusquedaCodigo]=StockProducto[BusquedaCodigo]-CantidadVenta;
+                    
+                    ProductosEnFactura[ContadorFactura][ContadorEnFactura]++;
+                    ContadorEnFactura++;
                     //finingreso
                     encontrado=true;
                 }
@@ -397,15 +434,20 @@ private static int ContadorFactura=0; //correlativo de facturas
             } while (continuar!=1 && continuar!=0);
             
         } while (continuar!=0);
+        FechaYHoraFactura[ContadorFactura]=ahora.format(formato);
         ContadorFactura++;
         System.out.println("--Factura registrada--");
+        Bitacora[ContadorBitacora]="|"+ahora.format(formato)+" |ACCION: "+"se registro una factura"+" |ACCION CORRECTA"+" |ADMIN";
+        ContadorBitacora++;
     }
     //fin op 4
     //op 5 generar reporte
     private static void GenerarReporte(){
+        LocalDateTime ahora = LocalDateTime.now();
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         int opcion;
-        if (ContadorProductos<=0) {//verificador de productos
-            System.out.println("ERROR: no hay productos ingresados");
+         if (ContadorProductos<=0) {//verificador de productos
+            System.out.println("ERROR: no hay productos ni ventas ingresados");
             return;
         }
         System.out.println("--REPORTES--");
@@ -423,17 +465,38 @@ private static int ContadorFactura=0; //correlativo de facturas
                     System.out.println("----------------------------");
                  }
             }
+                Bitacora[ContadorBitacora]="|"+ahora.format(formato)+" |ACCION: se realizo un reporte de productos |ACCION CORRECTA"+" |ADMIN";
+                ContadorBitacora++;
             break;
             case 2:
+                if (ContadorFactura<=0) {
+                    System.out.println("EEROR: No hay facturas registradas");
+                    return;
+                }
                 for (int i = 0; i < ContadorFactura; i++) {
+                    System.out.println("-------------------------");
                     System.out.println("FACTURA No:"+NoFactura[i]);
                     System.out.println("Fecha: "+FechaYHoraFactura[i]);
                     System.out.println("Total: "+TotalFactura[i]);
+                    System.out.println("Productos: ");
+                    for (int j = 0; j <= ProductosEnFactura[i][j]; j++) {
+                        System.out.println("Codigo: "+CodigosFactura[i][j]);
+                        System.out.println("Descripcion: "+DescripcionFactura[i][j]);
+                    }
                     
                 }
+                Bitacora[ContadorBitacora]="|"+ahora.format(formato)+" |ACCION: se realizo un reporte de facturas |ACCION CORRECTA |ADMIN";
+                ContadorBitacora++;
             break;
         }
         
+    }
+    //fin op 5
+    // op 7 bitacora
+    private static void bitacora(){
+        for (int i = 0; i <= ContadorBitacora; i++) {
+            System.out.println(""+Bitacora[i]);
+        }
     }
     // MÉTODO PARA CARGAR 20 PRODUCTOS DE PRUEBA
     private static void cargarProductosTest() {

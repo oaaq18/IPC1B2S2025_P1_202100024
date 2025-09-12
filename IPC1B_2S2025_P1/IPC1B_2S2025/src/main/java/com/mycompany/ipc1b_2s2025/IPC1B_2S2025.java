@@ -5,6 +5,8 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.Random;
 import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.*;
+import java.io.FileOutputStream;
 
 public class IPC1B_2S2025 {
 private static Scanner sc = new Scanner(System.in);//variable scanner
@@ -456,6 +458,10 @@ private static int ContadorBitacora=0;
         opcion = leerEntero("Ingrese una opcion: ");
         switch(opcion){
             case 1:
+                String ProductosPDF= ahora.format(formato)+"_stock.pdf";
+                //inicio documento reporte
+                
+                //fin documento reporte
                 for (int i = 0; i < ContadorProductos; i++) {
                  if (ProductosActivos[i]==false) {
                
